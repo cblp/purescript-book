@@ -1,12 +1,10 @@
 module Test.Main where
 
 import Prelude
-import Test.Examples
-import Test.MySolutions
+
 import Data.Array (sort)
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..))
-import Data.Path (Path(..), filename, root)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Test.Unit (TestSuite, suite, test)
@@ -14,11 +12,15 @@ import Test.Unit.Assert (assert, assertFalse)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
 
+import Data.Path (Path(..), filename, root)
+
+import Test.Examples
+import Test.MySolutions
+
 main :: Effect Unit
 main =
   runTest do
     runChapterExamples
-    {-  Move this block comment starting point to enable more tests
     suite "Exercise Group - Recursion" do
       suite "Exercise - isEven" do
         test "0 is even" do
@@ -74,7 +76,7 @@ main =
         test "Define <$?> operator for filter" do
           Assert.equal [ 1, 1 ]
             $ (_ == 1)
-            <$?> [ 1, 2, 3, 1, 2, 3 ]
+                <$?> [ 1, 2, 3, 1, 2, 3 ]
         test "keepNonNegativeRewrite " do
           Assert.equal [ 0.0, 2.0, 3.0 ]
             $ keepNonNegativeRewrite [ -1.5, -1.0, 0.0, -0.1, 2.0, 3.0, -4.0 ]
@@ -98,9 +100,7 @@ main =
           testcp label expected arr1 arr2 =
             test label do
               -- Sorting to allow any ordering
-              Assert.equal (sort expected)
-                $ sort
-                $ cartesianProduct arr1 arr2
+              Assert.equal (sort expected) $ sort $ cartesianProduct arr1 arr2
         testcp "Left array is empty" [] [] [ "five" ]
         testcp "Right array is empty" [] [ "5" ] []
         testcp "Two singleton arrays"
@@ -114,9 +114,7 @@ main =
       suite "Exercise - triples" do
         -- Sorting to allow for any ordering
         test "single element array result" do
-          Assert.equal (sort [ [ 3, 4, 5 ] ])
-            $ sort
-            $ triples 5
+          Assert.equal (sort [ [ 3, 4, 5 ] ]) $ sort $ triples 5
         test "multiple element array result" do
           Assert.equal (sort [ [ 3, 4, 5 ], [ 5, 12, 13 ], [ 6, 8, 10 ] ])
             $ sort
@@ -125,43 +123,26 @@ main =
         let
           primeFactorsTest :: Int -> Array Int -> _
           primeFactorsTest n xs =
-            test (show n) do
-              Assert.equal (sort xs)
-                $ sort
-                $ primeFactors n
+            test (show n) $ Assert.equal (sort xs) $ primeFactors n
         primeFactorsTest 1 []
-        primeFactorsTest 2 [2]
-        primeFactorsTest 3 [3]
-        primeFactorsTest 4 [2, 2]
-        primeFactorsTest 6 [3, 2]
-        primeFactorsTest 18 [3, 3, 2]
+        primeFactorsTest 2 [ 2 ]
+        primeFactorsTest 3 [ 3 ]
+        primeFactorsTest 4 [ 2, 2 ]
+        primeFactorsTest 6 [ 3, 2 ]
+        primeFactorsTest 18 [ 3, 3, 2 ]
         primeFactorsTest 210 [ 7, 5, 3, 2 ]
     suite "Exercise Group - Folds and Tail Recursion" do
       test "Exercise - allTrue" do
-        assert "all elements true"
-          $ allTrue [ true, true, true ]
-        assertFalse "some elements false"
-          $ allTrue [ true, false, true ]
+        assert "all elements true" $ allTrue [ true, true, true ]
+        assertFalse "some elements false" $ allTrue [ true, false, true ]
       suite "Exercise - fibTailRec" do
-        test "Verify 0" do
-          Assert.equal 0
-            $ fibTailRec 0
-        test "Verify 9" do
-          Assert.equal 34
-            $ fibTailRec 9
-        test "Verify 44" do
-          Assert.equal 701408733
-            $ fibTailRec 44
+        test "Verify 0" $ Assert.equal 0 $ fibTailRec 0
+        test "Verify 9" $ Assert.equal 34 $ fibTailRec 9
+        test "Verify 44" $ Assert.equal 701408733 $ fibTailRec 44
       suite "Exercise - reverse" do
-        test "Empty Array" do
-          Assert.equal ([] :: Array Int)
-            $ reverse []
-        test "Singleton Array" do
-          Assert.equal [ 1 ]
-            $ reverse [ 1 ]
-        test "More than 1 element" do
-          Assert.equal [ 3, 2, 1 ]
-            $ reverse [ 1, 2, 3 ]
+        test "Empty Array" $ Assert.equal ([] :: Array Int) $ reverse []
+        test "Singleton Array" $ Assert.equal [ 1 ] $ reverse [ 1 ]
+        test "More than 1 element" $ Assert.equal [ 3, 2, 1 ] $ reverse [ 1, 2, 3 ]
     suite "Exercise Group - Filesystem" do
       test "Exercise - onlyFiles" do
         Assert.equal
@@ -177,7 +158,7 @@ main =
           $ onlyFiles root
       suite "Exercise - whereIs" do
         test "locates a file"
-          $ Assert.equal (Just ("/bin/"))
+          $ Assert.equal (Just "/bin/")
           $ map filename
           $ whereIs root "ls"
         test "doesn't locate a file"
@@ -188,31 +169,25 @@ main =
         let
           testls :: String -> Array String -> Path -> TestSuite
           testls label expected path =
-            test label do
-              Assert.equal expected
-              -- Sorting to allow any ordering
-                $ sort
-                $ map filename
-                $ largestSmallest path
+            test label
+              $ Assert.equal expected
+              $ sort -- Sorting to allow any ordering
+              $ map filename
+              $ largestSmallest path
           oneFileDir = Directory "/etc/" [ File "/etc/hosts" 300 ]
           emptyDir = Directory "/etc/" []
-        testls "works for root" ["/etc/hosts", "/home/user/code/js/test.js"] root
-        testls "works for a directory with one file" ["/etc/hosts"] oneFileDir
+        testls "works for root"
+          [ "/etc/hosts", "/home/user/code/js/test.js" ]
+          root
+        testls "works for a directory with one file" [ "/etc/hosts" ] oneFileDir
         testls "works for an empty directory" [] emptyDir
 
--}
 runChapterExamples :: TestSuite
 runChapterExamples =
   suite "Chapter Examples" do
-    test "factorial" do
-      Assert.equal 120
-        $ factorial 5
-    test "fib" do
-      Assert.equal 34
-        $ fib 9
-    test "length" do
-      Assert.equal 3
-        $ length [ 0, 0, 0 ]
+    test "factorial" $ Assert.equal 120 $ factorial 5
+    test "fib" $ Assert.equal 34 $ fib 9
+    test "length" $ Assert.equal 3 $ length [ 0, 0, 0 ]
     sequence_ do
       name /\ f <-
         [ "factors" /\ factors
@@ -220,30 +195,21 @@ runChapterExamples =
         , "factorsV3" /\ factorsV3
         ]
       n /\ xs <-
-        [ 1 /\ [[1,1]]
-        , 2 /\ [[1,2]]
-        , 3 /\ [[1,3]]
-        , 4 /\ [[1,4],[2,2]]
-        , 10 /\ [[1,10],[2,5]]
-        , 100 /\ [[1,100],[2,50],[4,25],[5,20],[10,10]]
+        [ 1 /\ [ [ 1, 1 ] ]
+        , 2 /\ [ [ 1, 2 ] ]
+        , 3 /\ [ [ 1, 3 ] ]
+        , 4 /\ [ [ 1, 4 ], [ 2, 2 ] ]
+        , 10 /\ [ [ 1, 10 ], [ 2, 5 ] ]
+        , 100 /\ [ [ 1, 100 ], [ 2, 50 ], [ 4, 25 ], [ 5, 20 ], [ 10, 10 ] ]
         ]
       pure $ test (name <> " " <> show n) do
-        Assert.equal (sort $ map sort xs)
-          $ sort $ map sort f n
-    test "factorialTailRec" do
-      Assert.equal 120
-        $ factorialTailRec 5 1
-    test "lengthTailRec" do
-      Assert.equal 3
-        $ lengthTailRec [ 0, 0, 0 ]
+        Assert.equal (sort $ map sort xs) $ sort $ map sort f n
+    test "factorialTailRec" $ Assert.equal 120 $ factorialTailRec 5 1
+    test "lengthTailRec" $ Assert.equal 3 $ lengthTailRec [ 0, 0, 0 ]
     test "allFiles" do
-      Assert.equal allFileAndDirectoryNames
-        $ filename
-        <$> allFiles root
+      Assert.equal allFileAndDirectoryNames $ filename <$> allFiles root
     test "allFiles'" do
-      Assert.equal allFileAndDirectoryNames
-        $ filename
-        <$> allFiles' root
+      Assert.equal allFileAndDirectoryNames $ filename <$> allFiles' root
 
 allFileAndDirectoryNames :: Array (String)
 allFileAndDirectoryNames =
