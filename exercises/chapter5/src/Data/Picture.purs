@@ -1,7 +1,8 @@
 module Data.Picture where
 
 import Prelude
-import Data.Foldable (foldl)
+
+import Data.Foldable (fold, foldl)
 import Data.Number (infinity)
 import Math as Math
 
@@ -19,6 +20,7 @@ data Shape
   | Rectangle Point Number Number
   | Line Point Point
   | Text Point String
+  | Clipped Picture Point Number Number
 
 showShape :: Shape -> String
 showShape (Circle c r) =
@@ -29,6 +31,11 @@ showShape (Line start end) =
   "Line [start: " <> showPoint start <> ", end: " <> showPoint end <> "]"
 showShape (Text loc text) =
   "Text [location: " <> showPoint loc <> ", text: " <> show text <> "]"
+showShape (Clipped pic boundsStart w h) =
+  "Clipped [picture: " <> fold (map showShape pic)
+  <> ", bounds: " <> show boundsStart
+  <> ", width: " <> show w
+  <> ", height: " <> show h <> "]"
 
 exampleLine :: Shape
 exampleLine = Line p1 p2
@@ -48,10 +55,11 @@ origin = { x, y }
 -- origin = { x: 0.0, y: 0.0 }
 
 getCenter :: Shape -> Point
-getCenter (Circle c r) = c
-getCenter (Rectangle c w h) = c
+getCenter (Circle c _) = c
+getCenter (Rectangle c _ _) = c
 getCenter (Line s e) = (s + e) * {x: 0.5, y: 0.5}
-getCenter (Text loc text) = loc
+getCenter (Text loc _) = loc
+getCenter (Clipped _ b _ _) = b
 
 type Picture = Array Shape
 
@@ -98,6 +106,8 @@ shapeBounds (Text { x, y } _) =
   , bottom: y
   , right:  x
   }
+shapeBounds (Clipped p c w h) =
+  bounds p `intersect` shapeBounds (Rectangle c w h)
 
 union :: Bounds -> Bounds -> Bounds
 union b1 b2 =
